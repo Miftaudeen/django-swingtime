@@ -1,13 +1,11 @@
-from datetime import datetime, date, timedelta
-
-from django.utils.translation import ugettext_lazy as _
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
-from django.db import models
-from django.contrib.auth.models import User
-from django.conf import settings
+from datetime import datetime
 
 from dateutil import rrule
+from django.contrib.auth.models import User
+from django.contrib.contenttypes import fields
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 __all__ = (
     'Note',
@@ -26,9 +24,9 @@ class Note(models.Model):
     note = models.TextField(_('note'))
     created = models.DateTimeField(_('created'), auto_now_add=True)
 
-    content_type = models.ForeignKey(ContentType, verbose_name=_('content type'))
+    content_type = models.ForeignKey(ContentType, verbose_name=_('content type'), on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(_('object id'))
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = fields.GenericForeignKey('content_type', 'object_id')
 
     class Meta:
         verbose_name = _('note')
@@ -59,8 +57,8 @@ class Event(models.Model):
     """
     title = models.CharField(_('title'), max_length=32)
     description = models.CharField(_('description'), max_length=100)
-    event_type = models.ForeignKey(EventType, verbose_name=_('event type'))
-    notes = generic.GenericRelation(Note, verbose_name=_('notes'))
+    event_type = models.ForeignKey(EventType, verbose_name=_('event type'), on_delete=models.CASCADE)
+    notes = fields.GenericRelation(Note, verbose_name=_('notes'))
 
     class Meta:
         verbose_name = _('event')
@@ -164,8 +162,8 @@ class Occurrence(models.Model):
     """
     start_time = models.DateTimeField(_('start time'))
     end_time = models.DateTimeField(_('end time'))
-    event = models.ForeignKey(Event, verbose_name=_('event'), editable=False)
-    notes = generic.GenericRelation(Note, verbose_name=_('notes'))
+    event = models.ForeignKey(Event, verbose_name=_('event'), editable=False, on_delete=models.CASCADE)
+    notes = fields.GenericRelation(Note, verbose_name=_('notes'))
 
     objects = OccurrenceManager()
 
@@ -219,6 +217,7 @@ def create_event(title, event_type, description='', start_time=None,
     ``freq``, ``count``, ``rrule_params``
         follow the ``dateutils`` API (see http://labix.org/python-dateutil)
     """
+    global swingtime_settings
     from swingtime.conf import settings as swingtime_settings
 
     if isinstance(event_type, tuple):

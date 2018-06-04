@@ -1,13 +1,13 @@
 """
 Common features and functions for swingtime
 """
-from collections import defaultdict
-from datetime import datetime, date, time, timedelta
 import itertools
+from collections import defaultdict
+from datetime import datetime, date, timedelta
 
 from django.db.models.query import QuerySet
 from django.utils.safestring import mark_safe
-from dateutil import rrule
+
 from swingtime.conf import settings as swingtime_settings
 
 
@@ -16,8 +16,10 @@ def html_mark_safe(func):
     Decorator for functions return strings that should be treated as template
     safe.
     """
+
     def decorator(*args, **kws):
         return mark_safe(func(*args, **kws))
+
     return decorator
 
 
@@ -46,14 +48,8 @@ def css_class_cycler():
     Return a dictionary keyed by ``EventType`` abbreviations, whose values are an
     iterable or cycle of CSS class names.
     """
-    from swingtime.models import EventType
     return defaultdict(
-        lambda: itertools.cycle(('evt-even', 'evt-odd')).next,
-        ((e.abbr, itertools.cycle((
-             'evt-%s-even' % e.abbr,
-             'evt-%s-odd' % e.abbr
-             )).next) for e in EventType.objects.all()
-        )
+        lambda: itertools.cycle(('evt-even', 'evt-odd')).next
     )
 
 
@@ -62,6 +58,7 @@ class BaseOccurrenceProxy(object):
     A simple wrapper class for handling the presentational aspects of an
     ``Occurrence`` instance.
     """
+
     def __init__(self, occurrence, col):
         self.column = col
         self._occurrence = occurrence
@@ -75,7 +72,6 @@ class BaseOccurrenceProxy(object):
 
 
 class DefaultOccurrenceProxy(BaseOccurrenceProxy):
-
     def __init__(self, *args, **kws):
         super(DefaultOccurrenceProxy, self).__init__(*args, **kws)
         link = '<a href="%s">%s</a>' % (
@@ -83,21 +79,21 @@ class DefaultOccurrenceProxy(BaseOccurrenceProxy):
             self.title
         )
 
-        self._str = itertools.chain((link,),itertools.repeat(r'\\\///')).next
+        self._str = itertools.chain((link,), itertools.repeat(r'\\\///')).next
 
     @html_mark_safe
     def __unicode__(self):
-        print self.title
+        print(self.title)
         return self._str()
 
 
 def create_timeslot_table(dt=None, items=None,
-    start_time=swingtime_settings.TIMESLOT_START_TIME,
-    end_time_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
-    time_delta=swingtime_settings.TIMESLOT_INTERVAL,
-    min_columns=swingtime_settings.TIMESLOT_MIN_COLUMNS,
-    css_class_cycles=css_class_cycler,
-    proxy_class=DefaultOccurrenceProxy):
+                          start_time=swingtime_settings.TIMESLOT_START_TIME,
+                          end_time_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
+                          time_delta=swingtime_settings.TIMESLOT_INTERVAL,
+                          min_columns=swingtime_settings.TIMESLOT_MIN_COLUMNS,
+                          css_class_cycles=css_class_cycler,
+                          proxy_class=DefaultOccurrenceProxy):
     """
     Create a grid-like object representing a sequence of times (rows) and
     columns where cells are either empty or reference a wrapper object for
@@ -181,7 +177,7 @@ def create_timeslot_table(dt=None, items=None,
             colkey += 1
 
     # determine the number of timeslot columns we should show
-    column_lens = [len(x) for x in timeslots.itervalues()]
+    column_lens = [len(x) for x in timeslots.items()]
     column_count = max((min_columns, max(column_lens) if column_lens else 0))
     column_range = range(column_count)
     empty_columns = ['' for x in column_range]

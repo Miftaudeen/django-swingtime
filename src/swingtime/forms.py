@@ -5,8 +5,7 @@ from datetime import datetime, date, time, timedelta
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from django.forms.extras.widgets import SelectDateWidget
-
+from django import forms
 from dateutil import rrule
 from swingtime.conf import settings as swingtime_settings
 from swingtime import utils
@@ -33,49 +32,48 @@ WEEKDAY_LONG = (
 )
 
 MONTH_LONG = (
-    (1,  _(u'January')),
-    (2,  _(u'February')),
-    (3,  _(u'March')),
-    (4,  _(u'April')),
-    (5,  _(u'May')),
-    (6,  _(u'June')),
-    (7,  _(u'July')),
-    (8,  _(u'August')),
-    (9,  _(u'September')),
+    (1, _(u'January')),
+    (2, _(u'February')),
+    (3, _(u'March')),
+    (4, _(u'April')),
+    (5, _(u'May')),
+    (6, _(u'June')),
+    (7, _(u'July')),
+    (8, _(u'August')),
+    (9, _(u'September')),
     (10, _(u'October')),
     (11, _(u'November')),
     (12, _(u'December')),
 )
 
 MONTH_SHORT = (
-    (1,  _(u'Jan')),
-    (2,  _(u'Feb')),
-    (3,  _(u'Mar')),
-    (4,  _(u'Apr')),
-    (5,  _(u'May')),
-    (6,  _(u'Jun')),
-    (7,  _(u'Jul')),
-    (8,  _(u'Aug')),
-    (9,  _(u'Sep')),
+    (1, _(u'Jan')),
+    (2, _(u'Feb')),
+    (3, _(u'Mar')),
+    (4, _(u'Apr')),
+    (5, _(u'May')),
+    (6, _(u'Jun')),
+    (7, _(u'Jul')),
+    (8, _(u'Aug')),
+    (9, _(u'Sep')),
     (10, _(u'Oct')),
     (11, _(u'Nov')),
     (12, _(u'Dec')),
 )
 
-
 ORDINAL = (
-    (1,  _(u'first')),
-    (2,  _(u'second')),
-    (3,  _(u'third')),
-    (4,  _(u'fourth')),
+    (1, _(u'first')),
+    (2, _(u'second')),
+    (3, _(u'third')),
+    (4, _(u'fourth')),
     (-1, _(u'last'))
 )
 
 FREQUENCY_CHOICES = (
-    (rrule.DAILY,   _(u'Day(s)')),
-    (rrule.WEEKLY,  _(u'Week(s)')),
+    (rrule.DAILY, _(u'Day(s)')),
+    (rrule.WEEKLY, _(u'Week(s)')),
     (rrule.MONTHLY, _(u'Month(s)')),
-    (rrule.YEARLY,  _(u'Year(s)')),
+    (rrule.YEARLY, _(u'Year(s)')),
 )
 
 REPEAT_CHOICES = (
@@ -99,9 +97,9 @@ SECONDS_INTERVAL = utils.time_delta_total_seconds(swingtime_settings.DEFAULT_OCC
 
 
 def timeslot_options(interval=swingtime_settings.TIMESLOT_INTERVAL,
-    start_time=swingtime_settings.TIMESLOT_START_TIME,
-    end_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
-    fmt=swingtime_settings.TIMESLOT_TIME_FORMAT):
+                     start_time=swingtime_settings.TIMESLOT_START_TIME,
+                     end_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
+                     fmt=swingtime_settings.TIMESLOT_TIME_FORMAT):
     """
     Create a list of time slot options for use in swingtime forms.
 
@@ -121,9 +119,9 @@ def timeslot_options(interval=swingtime_settings.TIMESLOT_INTERVAL,
 
 
 def timeslot_offset_options(interval=swingtime_settings.TIMESLOT_INTERVAL,
-    start_time=swingtime_settings.TIMESLOT_START_TIME,
-    end_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
-    fmt=swingtime_settings.TIMESLOT_TIME_FORMAT):
+                            start_time=swingtime_settings.TIMESLOT_START_TIME,
+                            end_delta=swingtime_settings.TIMESLOT_END_TIME_DURATION,
+                            fmt=swingtime_settings.TIMESLOT_TIME_FORMAT):
     """
     Create a list of time slot options for use in swingtime forms.
 
@@ -144,6 +142,7 @@ def timeslot_offset_options(interval=swingtime_settings.TIMESLOT_INTERVAL,
 
     return options
 
+
 default_timeslot_options = timeslot_options()
 default_timeslot_offset_options = timeslot_offset_options()
 
@@ -155,7 +154,7 @@ class MultipleIntegerField(forms.MultipleChoiceField):
 
     def __init__(self, choices, size=None, label=None, widget=None):
         if widget is None:
-            widget = forms.SelectMultiple(attrs={'size' : size or len(choices)})
+            widget = forms.SelectMultiple(attrs={'size': size or len(choices)})
         super(MultipleIntegerField, self).__init__(
             required=False,
             choices=choices,
@@ -175,11 +174,10 @@ class SplitDateTimeWidget(forms.MultiWidget):
 
     def __init__(self, attrs=None):
         widgets = (
-            SelectDateWidget(attrs=attrs),
+            forms.SelectDateWidget(attrs=attrs),
             forms.Select(choices=default_timeslot_options, attrs=attrs)
         )
         super(SplitDateTimeWidget, self).__init__(widgets, attrs)
-
 
     def decompress(self, value):
         if value:
@@ -192,7 +190,7 @@ class MultipleOccurrenceForm(forms.Form):
     day = forms.DateField(
         label=_(u'Date'),
         initial=date.today,
-        widget=SelectDateWidget(),
+        widget=forms.SelectDateWidget(),
         localize=True,
     )
 
@@ -225,7 +223,7 @@ class MultipleOccurrenceForm(forms.Form):
     until = forms.DateField(
         required=False,
         initial=date.today,
-        widget=SelectDateWidget(),
+        widget=forms.SelectDateWidget(),
         localize=True,
     )
 
@@ -250,7 +248,7 @@ class MultipleOccurrenceForm(forms.Form):
 
     # monthly  options
     month_option = forms.ChoiceField(
-        choices=(('on',_(u'On the')), ('each',_(u'Each:'))),
+        choices=(('on', _(u'On the')), ('each', _(u'Each:'))),
         initial='each',
         widget=forms.RadioSelect(),
         label=_(u'Monthly options'),
@@ -260,7 +258,7 @@ class MultipleOccurrenceForm(forms.Form):
     month_ordinal = forms.IntegerField(widget=forms.Select(choices=ORDINAL))
     month_ordinal_day = forms.IntegerField(widget=forms.Select(choices=WEEKDAY_LONG))
     each_month_day = MultipleIntegerField(
-        [(i,i) for i in range(1,32)],
+        [(i, i) for i in range(1, 32)],
         widget=forms.CheckboxSelectMultiple
     )
 
@@ -301,7 +299,6 @@ class MultipleOccurrenceForm(forms.Form):
             self.initial.setdefault('start_time_delta', u'%d' % offset)
             self.initial.setdefault('end_time_delta', u'%d' % (offset + SECONDS_INTERVAL,))
 
-
     def clean(self):
         day = datetime.combine(self.cleaned_data['day'], time(0))
         self.cleaned_data['start_time'] = day + timedelta(
@@ -313,7 +310,6 @@ class MultipleOccurrenceForm(forms.Form):
         )
 
         return self.cleaned_data
-
 
     def save(self, event):
         if self.cleaned_data['repeats'] == 'no':
@@ -328,7 +324,6 @@ class MultipleOccurrenceForm(forms.Form):
         )
 
         return event
-
 
     def _build_rrule_params(self):
         iso = ISO_WEEKDAYS_MAP
@@ -367,7 +362,6 @@ class MultipleOccurrenceForm(forms.Form):
         return params
 
 
-
 class EventForm(forms.ModelForm):
     """
     A simple form for adding and updating Event attributes
@@ -386,8 +380,8 @@ class SingleOccurrenceForm(forms.ModelForm):
     A simple form for adding and updating single Occurrence attributes
     """
 
-    start_time = forms.DateTimeField(widget=SplitDateTimeWidget, localize=True,)
-    end_time = forms.DateTimeField(widget=SplitDateTimeWidget, localize=True,)
+    start_time = forms.DateTimeField(widget=SplitDateTimeWidget, localize=True, )
+    end_time = forms.DateTimeField(widget=SplitDateTimeWidget, localize=True, )
 
     class Meta:
         model = Occurrence
